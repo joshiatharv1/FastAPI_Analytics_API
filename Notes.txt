@@ -1,0 +1,78 @@
+Data is the new Oil, Control, Store and Refine it 
+Analytics API Microservice
+Store lot of data that changes over time 
+One Data Model 
+FASTAPI
+Storing data in the POstgresSQL thats optimisied for timeseries Data, we are using the TimeScale database.
+Docker to containerised the Application. 
+Routing through FastAPI 
+Complexity through Modelling. 
+
+FASTAPI: Take in Web Traffic data on other services and analyze them as we see fit. 
+Deploy in Production
+Jupyter Notebook will access the API Service. 
+
+Tools: 
+1. FastAPI Web Framework: Minimal Code Model
+2. Python 
+3. Docker: Deployed production environment + Database servcies (Timescale is Timeseries database, and just a more optmised POstgresSQL)
+4. 
+
+
+A. Setting Up Environment: 
+1. Install Python 
+2. Create a virtual Environment
+3. Install Python Package
+4. FastAPI HelloWorld 
+5. Docker Desktop and Docker Compose
+6. Production Dockerfile for FastAPI
+7. Docker setup for Hello World API endpoint using FastAPI
+
+-- Univeral Instller for mre stable release. 
+-- Install with certificates for more secure download version. 
+-- Install python on Docker later 
+-- 
+
+B. Whats an vitual Environment: 
+# Create a virtual environment in your project
+py -m venv .venv
+
+# Activate it
+.\.venv\Scripts\Activate.ps1
+# Now pip installs ONLY go into this project
+pip install requests
+# Deactivate when done
+deactivate
+(.venv) PS D:\Projects\Python\Analytics-API>
+
+
+C. How to install Packages in Python
+-- pip install "Package_Name"
+Another Command is Poetry add FastAPI
+-- pip install -r requirements.txt
+Another tool: pip-tools 
+-- uvicorn 
+You can delete theh .venv folder and recreate it
+
+D. Running the application 
+
+uvicorn main:app --reload
+Docker: 
+-- You want to share this application to your friend now How to do it?
+-- Download Python from python.ord, Create an Virtual Environment, install the packages from requirements.txt 
+-- Activate the virtaul environment
+-- use an specific uvicorn Command
+-- TOO DIFFICUTLT
+
+-- With Python bundle this commands and application Code this is Docker Contianer 
+-- Container image -- Download and install the virtual environment
+-- Install Docker Desktop
+-- Provides and production environment and stable local environment
+-- Bundle our FASTAPI Application as an Container. 
+Docker Commands 
+-- Docker pull python 3.6.15
+-- Docker run python 3.6.15
+-- Docker run -it python 3.6.15
+-- docker build -t analytics-api -f Dockerfile.web .
+-- docker run analytics-api
+E . boot source. 
