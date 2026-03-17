@@ -1,7 +1,8 @@
 fastapi
-uvicorn
+uvicorn[standard]
 gunicorn
 sqlmodel
 pydantic
 sqlalchemy
 timescaledb
+requests

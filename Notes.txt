@@ -75,4 +75,5 @@ Docker Commands
 -- Docker run -it python 3.6.15
 -- docker build -t analytics-api -f Dockerfile.web .
 -- docker run analytics-api
+-- Docker ps
 E . boot source. 
