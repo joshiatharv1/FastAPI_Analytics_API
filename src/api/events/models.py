@@ -53,9 +53,17 @@ class EventListSchema(SQLModel):
     
 class EventBucketListSchema(SQLModel):
     """Paginated list of bucket events."""
-    bucket:datetime
+    bucket: datetime
     page: str
+    ua: Optional[str] = None
+    os: Optional[str] = None
+    os_version: Optional[str] = None
+    browser: Optional[str] = None
+    is_mobile: Optional[bool] = None
+    is_tablet: Optional[bool] = None
     count: int
+    avg_duration: Optional[float] = None  # ← add this
+
 
 # --- Request Schemas ---
 # Used to validate incoming request bodies.

@@ -1,42 +1,66 @@
 import datetime
 from typing import List
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, func, select
 from timescaledb.hyperfunctions import time_bucket
+from user_agents import parse as parse_ua
+
 
 from .models import EventBucketListSchema, EventListSchema, EventCreateSchema, EventModel, EventUpdateSchema, get_utc_now
 from api.db.session import get_session
 router = APIRouter()
 
+DEFAULT_LOOKUP_PAGES=[
+    "/", "/about", "/pricing", "/contact", "/blog", "/products", "/login", "/signup", "/dashboard", "/settings"
+]
 
 # --- List Events ---
 # TODO: Replace stub data with a real DB query once connection is confirmed.
 #   results = session.exec(select(EventModel)).all()
 
+from user_agents import parse as parse_ua
+
 @router.get("/", response_model=List[EventBucketListSchema])
-def read_events(session: Session = Depends(get_session)):
-    bucket = time_bucket("10 sec", EventModel.time)
-    pages = ['/about', '/contact', '/pages', '/pricing']
-    start = datetime.now(timezone.utc) - timedelta(hours=1)
-    finish = datetime.now(timezone.utc) + timedelta(hours=1)
+def read_events(
+    duration: str = Query(default="1 day"),
+    pages: List = Query(default=None),
+    session: Session = Depends(get_session)
+):
+    bucket = time_bucket(duration, EventModel.time)
+    lookup_pages = pages if isinstance(pages, list) and len(pages) > 0 else DEFAULT_LOOKUP_PAGES
 
     query = (
         select(
             bucket.label('bucket'),
             EventModel.page.label('page'),
+            EventModel.user_agent.label('ua'),
             func.count().label('count')
         )
         .where(
-            EventModel.time > start,
-            EventModel.time <= finish,
-            EventModel.page.in_(pages)
+            EventModel.page.in_(lookup_pages)
         )
-        .group_by(bucket, EventModel.page)
+        .group_by(bucket, EventModel.user_agent, EventModel.page)
         .order_by(bucket, EventModel.page)
     )
     results = session.exec(query).fetchall()
-    return results
+
+    # Enrich each row with parsed OS info
+    enriched = []
+    for row in results:
+        ua = parse_ua(row.ua or "")
+        enriched.append({
+            "bucket": row.bucket,
+            "page": row.page,
+            "ua": row.ua,
+            "os": ua.os.family,          # e.g. "Windows", "Mac OS X", "Android"
+            "os_version": ua.os.version_string,  # e.g. "10", "14.0"
+            "browser": ua.browser.family,
+            "is_mobile": ua.is_mobile,
+            "is_tablet": ua.is_tablet,
+            "count": row.count,
+        })
+    return enriched
 
 # @router.get("/", response_model=List[EventBucketListSchema])
 # def read_events(session: Session = Depends(get_session)):
@@ -99,17 +123,17 @@ def create_event(payload: EventCreateSchema, session: Session = Depends(get_sess
 #   if not obj: raise HTTPException(status_code=404, detail="Event not found")
 #   obj.sqlmodel_update(payload.model_dump(exclude_unset=True))
 #   session.add(obj); session.commit(); session.refresh(obj)
-@router.put("/{event_id}", response_model=EventModel)
-def update_event(event_id: int, payload: EventUpdateSchema, session: Session = Depends(get_session)):
-    query=select(EventModel).where(EventModel.id==event_id)
-    obj=session.exec(query).first()
-    if not obj:
-        raise HTTPException(status_code=404, detail="PUT REQUEST: Event Not Found")
-    data=payload.model_dump()
-    for k,v in data.items():
-        setattr(obj, k, v)
-    obj.updated_at=get_utc_now()
-    session.add(obj)
-    session.commit()
-    session.refresh(obj)
-    return obj
+# @router.put("/{event_id}", response_model=EventModel)
+# def update_event(event_id: int, payload: EventUpdateSchema, session: Session = Depends(get_session)):
+#     query=select(EventModel).where(EventModel.id==event_id)
+#     obj=session.exec(query).first()
+#     if not obj:
+#         raise HTTPException(status_code=404, detail="PUT REQUEST: Event Not Found")
+#     data=payload.model_dump()
+#     for k,v in data.items():
+#         setattr(obj, k, v)
+#     obj.updated_at=get_utc_now()
+#     session.add(obj)
+#     session.commit()
+#     session.refresh(obj)
+#     return obj
