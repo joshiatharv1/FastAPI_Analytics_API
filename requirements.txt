@@ -6,3 +6,6 @@ pydantic
 sqlalchemy
 timescaledb
 requests
+python-decouple
+psycopg[binary]
+faker

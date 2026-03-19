@@ -77,3 +77,5 @@ Docker Commands
 -- docker run analytics-api
 -- Docker ps
 E . boot source. 
+
+F. POstgresSQL Database will have an docker volume attached to persist the data. 
